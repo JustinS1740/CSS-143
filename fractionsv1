@@ -1,0 +1,160 @@
+/*
+Justin Singsanavong, 1/9/23, CSS 143
+
+Questions:
+1) Can you complete this without using arrays? What is the least number 
+   of variables you can use to solve this problem? You can technically yes, do this project without
+   arrays by maybe taking two seperate String line inputs and comparing them in a while and for loop
+   but it will just be really technical to compare variables which it can get messy and confusing. The
+   least number of variables you could use to solve this problem would be around 13-14 variables, including
+   other methods.
+
+2) Can you use just one array to solve this? What would the data type 
+   be of that array? I think it would be impractical to use one array, since we need to find the count for each
+   fraction. Meaning making count as an int type and fraction as a String type. However, if you were trying to
+   use one array for this whole project, maybe you could just use String[] fractions and use a for loop to the
+   count the repeated fractions.
+
+3) What does it mean to make a class so another class is inside (or part of) 
+   the first class, so that it is composed of other data types? What does 
+   "composition" mean in that case? How is it done? Composition is way to combine objects
+   and form new ones. For an example, if we had two classes, and one of the classes is trying
+   to access the other class for it's methods and properties. Basically the first class is
+   making the other class act like a variable, an instance variable.
+
+4) What are some solutions to the reduction problem other than Euclid's GCD algorithm? In my
+   code, I used Euclid's GCD algorithm where basically if the second integer is 0, it just
+   returns the first integer as the GCD. Otherwise, you would calculate the remainder of
+   first and second integer, and set the remainder as the second integer. Then it will repeat
+   this process of trying to get the second integer to 0. Then you would divide the numerator
+   and denominator by the GCD. Another way to reduce fractions is doing a while loop where the
+   first integer doesn't equal 0. When doing this loop, it creates a new variable such as 'r' and
+   stores the first integer into r. then stores the modulo of second and first integer into first
+   integer variable. Then stores r into second integer variable. Then keep looping until a is 0
+   and returns the second integer variable.
+*/
+import java.io.File;
+import java.util.Scanner;
+
+public class fractionsv1 {
+   public static void main (String[] args) { 
+      //Executes the main program
+      calculateFractions();
+   }
+  
+   /*
+   Pre: reads each line of fractions from other text file, reduces the fraction to its
+        simplest form, stores each reduced fraction into an array, and counts each repeated
+        fraction
+       
+   Post: prints reduced fraction and prints the repeated count for each reduced fraction
+   */
+   public static void calculateFractions() {
+      /*
+      counts and fractions creates a new list of Arrays and the number of indexes the
+      array has comes from the countFractions() method which counts the number of lines
+      the file has
+      */
+      int[] count = new int[countFractions()];
+      String[] fractions = new String[countFractions()]; 
+      File file = new File("fractions.txt"); 
+      int numOfFractions = 0;  
+      try (Scanner fileScanner = new Scanner(file)){
+     
+         /*   
+         Starts off with a while loop and uses the scanner "fileScanner", that reads the input from the other file,
+     
+         and reads each line
+         */
+         while (fileScanner.hasNextLine()) {
+            String fraction = fileScanner.nextLine();
+            /*
+            After reading the first line, we use the String split() method to
+            split the numerator and denominator of the fraction. Then we store the split index "0" into
+            numerator and index "1" into denominator
+            */
+            String[] parts = fraction.split("/");
+            int numerator = Integer.parseInt(parts[0]);
+            int denominator = Integer.parseInt(parts[1]);
+                 
+            //Uses numerator and denominator for parameter values for gcd() method (Greatest Common Denominator)
+            int gcd1 = gcd(numerator, denominator);
+        
+            //Divide numerator and denominator by gcd to get the simplified fraction
+            numerator /= gcd1;
+            denominator /= gcd1;
+        
+            //Places simplified fraction into a new fraction string 
+            String reducFraction = numerator + "/" + denominator;
+        
+            //Set variable "match" as false for default value    
+            boolean match = false;
+        
+            /*         
+            For loop indicates if there's a fraction that has been seen before in the array and count
+            gets added once everytime the fractions equals the next fraction. Once the fractions have been counted,
+            the for loop terminates and the reducFraction goes to the next fraction from the while loop
+            */
+            for (int i = 0; i < numOfFractions; i++) {
+               if (reducFraction.equals(fractions[i])) {
+                  count[i]++;
+                  match = true;
+                  break;
+               }
+            }
+        
+            /*
+            If the fractions is not in the current array value, it adds the reducFraction into the index
+            and increases the numOfFractions variable to keep the track how many SIMPLIFIED fractions there
+            are in total. And puts count at 1 so it knows that that index has a whole new fraction there
+            */
+            if (match != true) {
+               fractions[numOfFractions] = reducFraction;
+               count[numOfFractions] = 1;
+               numOfFractions++;
+            }
+         }
+      }
+      
+      catch(Exception e) {
+         System.out.println("File not found");
+      }
+  
+      //Prints the output of the program: 'fraction' has a count of: 'number of counts'
+      for (int i = 0; i < numOfFractions; i++) {
+         System.out.println(fractions[i] + " has a count of: " + count[i]);
+      }
+   }
+
+   //Pre: counts the number of lines of fractions in the other text file
+   //Post: returns the number of fractions
+   public static int countFractions() {
+      File file = new File("fractions.txt"); 
+      int count = 0;
+      try (Scanner fileScanner = new Scanner(file)) {
+         while (fileScanner.hasNextLine()) {
+            fileScanner.nextLine();
+            count++;
+         }
+      }
+     
+      catch (Exception e) { 
+         System.out.println("File not found");
+      }
+      return count;
+   }
+
+   /*
+   Pre: takes numerator and denominator as parameter values and
+        finds Greatest Common Denominator between parameter values
+       
+   Post: returns the gcd of numerator and denominator, if denominator
+         equal 0, returns the numerator has the gcd
+   */
+   public static int gcd (int a, int b) {
+      if (b == 0) {
+         return a;
+      }
+      return gcd(b, a % b);
+   }
+}
